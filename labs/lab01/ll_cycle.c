@@ -2,6 +2,13 @@
 #include "ll_cycle.h"
 
 int ll_has_cycle(node *head) {
-    /* your code here */
+    node* h = head;
+    node* t = head;
+    while(h != NULL){
+        if(h->next == NULL) break;
+        h = h->next->next;
+        t = t->next;
+        if(h == t) return 1;
+    }
     return 0;
 }
