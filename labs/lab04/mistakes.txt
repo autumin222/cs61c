@@ -1,0 +1,19 @@
+1. at the start of the maploop, need to take the address of the first item of the array
+not just copy the pointer
+    add t1, s0, x0 -> lw t1, 0(s0)
+2. we need to get the next position of the array according to the counter t0
+
+    slli t3, t0, 2      # there are 4 bits cost by the int
+    add t1, t1, t3      # offset the array address by the count
+
+3. caller save the t1, because the func uses the t1
+
+    addi sp, sp, -4     # caller save volatile register t1
+    sw t1, 0(sp)
+
+    jalr s1             # call the function on that value.
+
+    lw t1, 0(sp)
+    addi sp, sp, 4
+4. la a0, 8(s0) -> lw a0, 8(s0)
+5. lw a1, s1, 0 ->addi a1, s1, 0

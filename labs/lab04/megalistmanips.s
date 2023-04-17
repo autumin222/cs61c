@@ -62,21 +62,32 @@ map:
     # - 4 for the size of the array
     # - 4 more for the pointer to the next node
 mapLoop:
-    add t1, s0, x0      # load the address of the array of current node into t1
+    #add t1, s0, x0      # load the address of the array of current node into t1
+    lw t1, 0(s0)        # the address of the first item in the array
     lw t2, 4(s0)        # load the size of the node's array into t2
 
-    add t1, t1, t0      # offset the array address by the count
+
+    slli t3, t0, 4     # there are 4 bits cost by the int
+    add t1, t1, t3      # offset the array address by the count
     lw a0, 0(t1)        # load the value at that address into a0
 
+    addi sp, sp, -4     # caller save volatile register t1
+    sw t1, 0(sp)
+
     jalr s1             # call the function on that value.
+
+    lw t1, 0(sp)
+    addi sp, sp, 4
 
     sw a0, 0(t1)        # store the returned value back into the array
     addi t0, t0, 1      # increment the count
     bne t0, t2, mapLoop # repeat if we haven't reached the array size yet
 
-    la a0, 8(s0)        # load the address of the next node into a0
-    lw a1, 0(s1)        # put the address of the function back into a1 to prepare for the recursion
-
+   # la a0, 8(s0)        # load the address of the next node into a0
+    lw a0, 8(s0)        # it is the address in the pointer
+   # lw a1, 0(s1)        # put the address of the function back into a1 to prepare for the recursion
+    addi a1, s1, 0      # the address of the func is stored in s1,
+                        # don't try to take the func from the address
     jal  map            # recurse
 done:
     lw s0, 8(sp)
@@ -85,7 +96,7 @@ done:
     addi sp, sp, 12
     jr ra
 
-mystery:
+mystery:                # return a0 ^ 2 + 1
     mul t1, a0, a0
     add a0, t1, a0
     jr ra
